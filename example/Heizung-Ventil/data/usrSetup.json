@@ -52,15 +52,15 @@
     {
       "type": "digitalIn",
       "name": "Ventil Drehgeber",
-      "pin": 27,
+      "pin": 8,
       "pullup": "up",
       "mode": "count"
     },
     {
       "type": "valve2DPosImp",
       "name": "Ventil",
-      "pinOpen": 16,
-      "pinClose": 17
+      "pinOpen": 9,
+      "pinClose": 10
     }
   ],
   "links": [

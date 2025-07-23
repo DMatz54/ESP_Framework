@@ -1,0 +1,17 @@
+{
+  "hardware": [],
+  "functions": [
+    {
+      "type": "server",
+      "name": "Server",
+      "server": "IotServer"
+    },
+    {
+      "type": "digitalOut",
+      "name": "BulidInLED",
+      "pinOutput": 8
+    }
+  ],
+  "links": [
+  ]
+}
