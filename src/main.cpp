@@ -26,10 +26,13 @@
 #endif
 
 // Basics
+#include <JCA_IOT_FuncHandler.h>
 #include <JCA_IOT_Server.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
-#include <JCA_IOT_FuncHandler.h>
+
+// Project Hardware
+#include <JCA_IOT_Hardware.h>
 
 // Project function
 #ifdef ESP32
@@ -76,10 +79,13 @@ FuncHandler Handler ("handler");
 //PwmOutput HwPWM;
 //OneWire HwOneWire;
 //TwoWire HwTwoWire = TwoWire(TwoWireNum);
-void linkHardware() {
+void addHardwareToHandler() {
+  // Link const Hardware
   Handler.HardwareMapping.insert (std::pair<String, void *> ("IotServer", &IotServer));
-  //Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
-  //Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
+
+  // Add Hardware Interfaces
+  JCA::IOT::AddOneWire (Handler);
+  JCA::IOT::AddPwmOutput (Handler);
   //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
   //Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
 }
@@ -120,13 +126,13 @@ void cbSaveConfig () {
 
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out[FuncParent::JsonTagElements].to<JsonObject>();
-  Handler.getValues(Elements);
+  Handler.getValues (Elements, JCA::TAG::TagAccessType_T::Read);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In[FuncParent::JsonTagElements].is<JsonObject>()) {
     JsonObject Elements = _In[FuncParent::JsonTagElements].as<JsonObject>();
-    Handler.setValues(Elements);
+    Handler.setValues (Elements, JCA::TAG::TagAccessType_T::Write);
   }
   if (_In["mode"].is<JsonVariant> ()) {
     Handler.patch (_In["mode"].as<String> ());
@@ -135,10 +141,45 @@ void setAll (JsonVariant &_In) {
 //-------------------------------------------------------
 // Website Functions
 //-------------------------------------------------------
-String cbWebHomeReplace (const String &var) {
-  return String ();
+String createConfigHRef (const String FilePath, const String LinkText) {
+  return String ("<a href = \"") + FilePath + String ("\" target=\"_blank\">") + LinkText + String("</a><br/>");
 }
-String cbWebConfigReplace (const String &var) {
+String cbWebUserReplace (const String &var) {
+#ifdef JCA_IOT_FILE_SYSTEMCONFIG
+  if (var == "SYSTEMCONFIG_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_SYSTEMCONFIG, "System Config");
+  }
+#endif
+#ifdef JCA_IOT_FILE_SYSTEMCONFIG
+  if (var == "WIFICONFIG_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_WIFICONFIG, "WiFi Config");
+  }
+#endif
+#ifdef JCA_IOT_FILE_SETUP
+  if (var == "SETUP_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_SETUP, "Function Setup");
+  }
+#endif
+#ifdef JCA_IOT_FILE_FUNCTIONS
+  if (var == "FUNCTIONS_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_FUNCTIONS, "Function Listing");
+  }
+#endif
+#ifdef JCA_IOT_FILE_VALUES
+  if (var == "VALUES_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_VALUES, "Value Listing");
+  }
+#endif
+#ifdef JCA_IOT_FILE_LOG
+  if (var == "LOG_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_LOG, "Log File");
+  }
+#endif
+#ifdef JCA_IOT_FILE_WIFICONFIG
+  if (var == "LOG_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_WIFICONFIG, "WiFi Config");
+  }
+#endif
   return String ();
 }
 //-------------------------------------------------------
@@ -203,7 +244,7 @@ void setup () {
   DebugFlags |= FLAG_ERROR;
   DebugFlags |= FLAG_SETUP;
   DebugFlags |= FLAG_CONFIG;
-  // DebugFlags |= FLAG_TRAFFIC;
+  DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
@@ -233,8 +274,7 @@ void setup () {
   IotServer.onSaveConfig (cbSaveConfig);
   Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-System Done");
   // Web
-  IotServer.onWebHomeReplace (cbWebHomeReplace);
-  IotServer.onWebConfigReplace (cbWebConfigReplace);
+  IotServer.onWebUserReplace (cbWebUserReplace);
   Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-Web Done");
   // RestAPI
   IotServer.onRestApiGet (cbRestApiGet);
@@ -250,7 +290,7 @@ void setup () {
 
   // Function-Handler
   addFunctionsToHandler();
-  linkHardware();
+  addHardwareToHandler();
   Handler.patch ("init");
   Debug.println (FLAG_SETUP, false, "root", __func__, "FunctionHandler Done");
 
