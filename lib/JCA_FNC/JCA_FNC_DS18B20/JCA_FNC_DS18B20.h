@@ -72,8 +72,8 @@ namespace JCA {
       unsigned long LastMillis;
 
       void addrChanged ();
-      bool validFamily ();
-      bool validAddr ();
+      bool validFamily (uint8_t _Addr[ONEWIRE_ADDRSIZE]);
+      bool validAddr (uint8_t _Addr[ONEWIRE_ADDRSIZE]);
 
     public:
       DS18B20 (OneWire *_Wire, String _Name);

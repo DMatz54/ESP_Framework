@@ -619,6 +619,59 @@ namespace JCA {
       }
     }
 
+    /**
+     * @brief Generate a Debug-Output depends on the selected Falgs on init, with line break.
+     * "[JCA::IOT::]Object::Function - Message"
+     *
+     * @param _Flag Flag for Debug Message, only Output if Flag set on init
+     * @param _Framework use from Framework, add the Namespace tp Prefix
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
+     * @param _Function Name of the Function
+     * @param _Message Message Text
+     * @param _Length Length of the Array to print
+     * @param _Base Base for output, 10 for decimal, 16 for hex
+     * @return true Message was output to Debug-Interface
+     * @return false Message not output to Debug-Interface
+     */
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, uint8_t _Message[], unsigned int _Length, unsigned char _Base) {
+      if (_Flag & Flags) {
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
+        for (uint8_t i = 0; i < _Length; i++) {
+          DebugSerial.print( String (_Message[i], HEX));
+          if (i < _Length - 1) {
+            DebugSerial.print (":");
+          }
+        }
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    /**
+     * @brief Generate a Debug-Output depends on the selected Falgs on init, with line break.
+     * "[JCA::IOT::]Object::Function - Message"
+     *
+     * @param _Flag Flag for Debug Message, only Output if Flag set on init
+     * @param _Framework use from Framework, add the Namespace tp Prefix
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
+     * @param _Function Name of the Function
+     * @param _Message Message Text
+     * @param _Length Length of the Array to print
+     * @param _Base Base for output, 10 for decimal, 16 for hex
+     * @return true Message was output to Debug-Interface
+     * @return false Message not output to Debug-Interface
+     */
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, uint8_t _Message[], unsigned int _Length, unsigned char _Base) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message, _Length, _Base)) {
+        DebugSerial.println ();
+        NewLine = true;
+        return true;
+      } else {
+        return false;
+      }
+    }
+
     DebugOut Debug (Serial);
   }
 }

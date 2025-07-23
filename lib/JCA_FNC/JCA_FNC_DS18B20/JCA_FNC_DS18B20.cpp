@@ -60,16 +60,32 @@ namespace JCA {
 
       // if the Address is not Valid, the first Sensor will be selected
       if (!AddrIsValid) {
+        if (DiffMillis < ReadInterval * 1000) {
+          return;
+        }
+        LastMillis = millis ();
+
+        uint32_t FoundValid = 0;
         uint8_t SearchAddr[ONEWIRE_ADDRSIZE];
         Wire->reset_search ();
         while (Wire->search (SearchAddr)) {
-          if (validAddr ()) {
-            if (validFamily ()) {
+          Debug.print (FLAG_SETUP, false, Name, __func__, "Found : ");
+          Debug.println (FLAG_SETUP, false, Name, __func__, SearchAddr, ONEWIRE_ADDRSIZE, HEX);
+          if (validAddr (SearchAddr)) {
+            FoundValid++;
+            if (validFamily (SearchAddr)) {
               memcpy (Addr, SearchAddr, ONEWIRE_ADDRSIZE);
               AddrIsValid = true;
               break;
             }
           }
+        }
+        if (!AddrIsValid) {
+          Debug.println (FLAG_ERROR, false, Name, __func__, "No valid DS18B20 found");
+          return;
+        } else {
+          Debug.print (FLAG_SETUP, false, Name, __func__, "Found DS18B20: ");
+          Debug.println (FLAG_SETUP, false, Name, __func__, Addr, ONEWIRE_ADDRSIZE, HEX);
         }
         return;
       }
@@ -134,12 +150,12 @@ namespace JCA {
     }
 
     void DS18B20::addrChanged () {
-      AddrIsValid = validFamily () && validAddr ();
+      AddrIsValid = validFamily (Addr) && validAddr (Addr);
     }
 
-    bool DS18B20::validFamily () {
+    bool DS18B20::validFamily (uint8_t _Addr[ONEWIRE_ADDRSIZE]) {
       // Check if the address family-code matchs
-      switch (Addr[0]) {
+      switch (_Addr[0]) {
       case DS18B20_Type_T::TYPE_S:
       case DS18B20_Type_T::TYPE_B:
       case DS18B20_Type_T::TYPE_22:
@@ -151,8 +167,8 @@ namespace JCA {
       }
     }
 
-    bool DS18B20::validAddr () {
-      return (Wire->crc8 (Addr, 7) == Addr[7]);
+    bool DS18B20::validAddr (uint8_t _Addr[ONEWIRE_ADDRSIZE]) {
+      return (Wire->crc8 (_Addr, 7) == _Addr[7]);
     }
 
     /**

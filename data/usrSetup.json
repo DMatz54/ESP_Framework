@@ -1,11 +1,19 @@
 {
-  "hardware": [    {
-    "type": "onewire",
-    "name": "oneWire1",
-    "pin": 4
-  }
-],
+  "hardware": [
+    {
+      "type": "onewire",
+      "name": "oneWire1",
+      "pin": 4
+    }
+  ],
   "functions": [
+    {
+      "type": "ds18b20",
+      "name": "Ruecklauf Temperatur",
+      "refName": "oneWire1"
+    }
+  ],
+  "functionsOri": [
     {
       "type": "valueDigital",
       "name": "Heizung Festwert"
@@ -68,7 +76,8 @@
       "pinClose": 10
     }
   ],
-  "links": [
+  "links": [],
+  "linksOri": [
     {
       "type": "direct",
       "from": [

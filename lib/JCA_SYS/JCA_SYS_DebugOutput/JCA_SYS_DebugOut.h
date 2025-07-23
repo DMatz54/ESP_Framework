@@ -85,6 +85,8 @@ namespace JCA {
       bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned char _Message);
       bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message);
       bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, uint8_t _Message[], unsigned int _Length, unsigned char _Base);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, uint8_t _Message[], unsigned int _Length, unsigned char _Base);
     };
 
     extern DebugOut Debug;
