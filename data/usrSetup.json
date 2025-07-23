@@ -1,5 +1,10 @@
 {
-  "hardware": [],
+  "hardware": [    {
+    "type": "onewire",
+    "name": "oneWire1",
+    "pin": 4
+  }
+],
   "functions": [
     {
       "type": "valueDigital",
@@ -22,7 +27,7 @@
     {
       "type": "ds18b20",
       "name": "Ruecklauf Temperatur",
-      "refName": "??oneWirw??"
+      "refName": "oneWire1"
     },
     {
       "type": "server",

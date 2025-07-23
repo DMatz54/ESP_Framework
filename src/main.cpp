@@ -31,6 +31,9 @@
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
 
+// Project Hardware
+#include <JCA_IOT_Hardware.h>
+
 // Project function
 #ifdef ESP32
   #include <JCA_FNC_AcDimmers.h>
@@ -76,10 +79,13 @@ FuncHandler Handler ("handler");
 //PwmOutput HwPWM;
 //OneWire HwOneWire;
 //TwoWire HwTwoWire = TwoWire(TwoWireNum);
-void linkHardware() {
+void addHardwareToHandler() {
+  // Link const Hardware
   Handler.HardwareMapping.insert (std::pair<String, void *> ("IotServer", &IotServer));
-  //Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
-  //Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
+
+  // Add Hardware Interfaces
+  JCA::IOT::AddOneWire (Handler);
+  JCA::IOT::AddPwmOutput (Handler);
   //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
   //Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
 }
@@ -284,7 +290,7 @@ void setup () {
 
   // Function-Handler
   addFunctionsToHandler();
-  linkHardware();
+  addHardwareToHandler();
   Handler.patch ("init");
   Debug.println (FLAG_SETUP, false, "root", __func__, "FunctionHandler Done");
 

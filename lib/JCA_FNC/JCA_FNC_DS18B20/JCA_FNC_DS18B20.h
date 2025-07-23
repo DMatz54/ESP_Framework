@@ -9,6 +9,9 @@
  * Apache License
  *
  */
+#ifndef ONEWIRE_ADDRSIZE
+#define ONEWIRE_ADDRSIZE 8
+#endif
 
 #ifndef _JCA_FNC_DS18B20_
 #define _JCA_FNC_DS18B20_
@@ -29,7 +32,9 @@ namespace JCA {
     enum DS18B20_Type_T {
       TYPE_S = 0x10,
       TYPE_B = 0x28,
-      TYPE_22 = 0x22
+      TYPE_22 = 0x22,
+      TYPE_25 = 0x3B,
+      TYPE_DS28 = 0x42
     };
     enum DS18B20_Cmd_T {
       CONV = 0x44,
@@ -53,7 +58,7 @@ namespace JCA {
 
       // Konfig
       float Filter;
-      uint8_t Addr[8];
+      uint8_t Addr[ONEWIRE_ADDRSIZE];
       uint16_t ReadInterval;
 
       // Daten
@@ -63,7 +68,12 @@ namespace JCA {
       uint8_t Raw[12];
       int32_t Resend;
       bool ReadData;
+      bool AddrIsValid;
       unsigned long LastMillis;
+
+      void addrChanged ();
+      bool validFamily ();
+      bool validAddr ();
 
     public:
       DS18B20 (OneWire *_Wire, String _Name);
