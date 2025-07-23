@@ -30,7 +30,7 @@ namespace JCA {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
       Tags.push_back (new TagFloat ("Filter", "Filterkonstante", "", false, TagUsage_T::UseConfig, &Filter, "s"));
-      Tags.push_back (new TagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", false, TagUsage_T::UseConfig, &Addr[0], 8, std::bind (&DS18B20::addrChanged, this)));
+      Tags.push_back (new TagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", false, TagUsage_T::UseConfig, &Addr[0], 8));
       Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
       Tags.push_back (new TagFloat ("Temp", "Temperatur", "", true, TagUsage_T::UseData, &Value, "°C"));
@@ -44,7 +44,6 @@ namespace JCA {
       Addr[5] = 0;
       Addr[6] = 0;
       Addr[7] = 0;
-      AddrIsValid = false;
       ReadInterval = 1;
       Filter = 5.0;
       Value = 0.0;
@@ -62,24 +61,6 @@ namespace JCA {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       int16_t raw;
       uint32_t DiffMillis = millis () - LastMillis;
-
-      // if the Address is not Valid, the first Sensor will be selected
-      if (!AddrIsValid()) {
-        uint8_t SearchAddr[8];
-        Wire->reset_search();
-        delay(INITIALIZATION_DELAY_MS);
-        while (Wire->search(SearchAddr)) {
-          if (validAddr(SearchAddr)) {
-            if (validFamily(SearchAddr)) {
-              Addr = SeachAddr;
-              AddrIsValid = true;
-              break;
-            }
-          }
-        }
-        return;
-      }
-
 
       // If Resend counts to 0 resend convertion Request
       if (this->Resend <= 0) {
@@ -139,29 +120,6 @@ namespace JCA {
         this->Resend -= DiffMillis;
       }
     }
-
-    void DS18B20::addrChanged() {
-      AddrIsValid = validFamily() && validAddr();
-    }
-
-    bool DS18B20::validFamily() {
-      // Check if the address family-code matchs
-      switch (Addr[0]) {
-        case DS18B20_Type_T::TYPE_S:
-        case DS18B20_Type_T::TYPE_B:
-        case DS18B20_Type_T::TYPE_22:
-        case DS18B20_Type_T::TYPE_25:
-        case DS18B20_Type_T::TYPE_DS28:
-            return true;
-        default:
-            return false;
-      }
-    }
-
-    bool DS18B20::validAddr() {
-      return (Wire->crc8(Addr, 7) == Addr[7]);
-    }
-
 
     /**
      * @brief Adds the creation method to the Function-Handler

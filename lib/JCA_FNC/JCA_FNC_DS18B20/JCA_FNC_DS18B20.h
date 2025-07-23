@@ -29,9 +29,7 @@ namespace JCA {
     enum DS18B20_Type_T {
       TYPE_S = 0x10,
       TYPE_B = 0x28,
-      TYPE_22 = 0x22,
-      TYPE_25 = 0x3B,
-      TYPE_DS28 = 0x42
+      TYPE_22 = 0x22
     };
     enum DS18B20_Cmd_T {
       CONV = 0x44,
@@ -65,12 +63,7 @@ namespace JCA {
       uint8_t Raw[12];
       int32_t Resend;
       bool ReadData;
-      bool AddrIsValid;
       unsigned long LastMillis;
-
-      void addrChanged();
-      bool validFamily();
-      bool validAddr();
 
     public:
       DS18B20 (OneWire *_Wire, String _Name);
