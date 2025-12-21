@@ -19,7 +19,7 @@ namespace JCA {
     const char *Valve2DPosImp::SetupTagType = "valve2DPosImp";
     const char *Valve2DPosImp::SetupTagOpenPin = "pinOpen";
     const char *Valve2DPosImp::SetupTagClosePin = "pinClose";
-
+    const char *Valve2DPosImp::SetupTagEnablePin = "pinEnable";
     /**
      * @brief Construct a new Valve2DPosImp::Valve2DPosImp object
      *
@@ -27,7 +27,7 @@ namespace JCA {
      * @param _PinClose Digital Pin for Close
      * @param _Name Element Name inside the Communication
      */
-    Valve2DPosImp::Valve2DPosImp (uint8_t _PinOpen, uint8_t _PinClose, String _Name)
+    Valve2DPosImp::Valve2DPosImp (uint8_t _PinOpen, uint8_t _PinClose, uint8_t _PinEnable, String _Name)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
@@ -52,6 +52,9 @@ namespace JCA {
       PinClose = _PinClose;
       pinMode (PinClose, OUTPUT);
       digitalWrite (PinClose, LOW);
+      PinEnable = _PinEnable;
+      pinMode (PinEnable, OUTPUT);
+      digitalWrite (PinEnable, HIGH);
       // Initialisierung der Variablen
       NoPulseTimeout = 2000;
       PositionPulseHyst = 5;
@@ -141,6 +144,7 @@ namespace JCA {
       case State_T::WAITING:
         digitalWrite (PinClose, LOW);
         digitalWrite (PinOpen, LOW);
+        digitalWrite (PinEnable, HIGH);
         if (StepTime >= WaitTime) {
           CurrentState = NextState;
           LastPulseTime = 0;
@@ -151,6 +155,7 @@ namespace JCA {
       case State_T::INIT_OPEN:
         digitalWrite (PinOpen, HIGH);
         digitalWrite (PinClose, LOW);
+        digitalWrite (PinEnable, HIGH);
         if (LastPulseTime > NoPulseTimeout) {
           // Close Position reached
           PositionPulse = 0;
@@ -166,6 +171,7 @@ namespace JCA {
       case State_T::INIT_CLOSE:
         digitalWrite (PinClose, HIGH);
         digitalWrite (PinOpen, LOW);
+        digitalWrite (PinEnable, HIGH);
         PositionPulse += DiffPulse;
         if (LastPulseTime > NoPulseTimeout) {
           // Close Position reached
@@ -189,6 +195,7 @@ namespace JCA {
       case State_T::INPOSITION:
         digitalWrite (PinClose, LOW);
         digitalWrite (PinOpen, LOW);
+        digitalWrite (PinEnable, LOW);
         if (SetpointPulse > PositionPulse + PositionPulseHyst) {
           NextState = State_T::OPENING;
         } else if (SetpointPulse < PositionPulse - PositionPulseHyst) {
@@ -199,6 +206,7 @@ namespace JCA {
       case State_T::OPENING:
         digitalWrite (PinOpen, HIGH);
         digitalWrite (PinClose, LOW);
+        digitalWrite (PinEnable, HIGH);
         PositionPulse += DiffPulse;
         if (PositionPulse >= SetpointPulse) {
           NextState = State_T::INPOSITION;
@@ -217,6 +225,7 @@ namespace JCA {
       case State_T::CLOSING:
         digitalWrite (PinClose, HIGH);
         digitalWrite (PinOpen, LOW);
+        digitalWrite (PinEnable, HIGH);
         PositionPulse -= DiffPulse;
         if (PositionPulse <= SetpointPulse) {
           NextState = State_T::INPOSITION;
@@ -235,6 +244,7 @@ namespace JCA {
       case State_T::FAULT:
         digitalWrite (PinClose, LOW);
         digitalWrite (PinOpen, LOW);
+        digitalWrite (PinEnable, LOW);
         break;
       }
 
@@ -274,10 +284,10 @@ namespace JCA {
       String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
       uint8_t PinOpen = GetSetupValueUINT8 (SetupTagOpenPin, Done, _Setup, Log);
       uint8_t PinClose = GetSetupValueUINT8 (SetupTagClosePin, Done, _Setup, Log);
-
+      uint8_t PinEnable = GetSetupValueUINT8 (SetupTagEnablePin, Done, _Setup, Log);
       if (Done) {
-        _Functions.push_back (new Valve2DPosImp (PinOpen, PinClose, Name));
-        Log["done"] = Name + " (Valve2DPosImp - Open:" + String (PinOpen) + " - Close:" + String (PinClose) + ")";
+        _Functions.push_back (new Valve2DPosImp (PinOpen, PinClose, PinEnable, Name));
+        Log["done"] = Name + " (Valve2DPosImp - Open:" + String (PinOpen) + " - Close:" + String (PinClose) + " - Enable:" + String (PinEnable) + ")";
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;

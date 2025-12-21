@@ -3,17 +3,10 @@
     {
       "type": "onewire",
       "name": "oneWire1",
-      "pin": 4
+      "pin": 3
     }
   ],
   "functions": [
-    {
-      "type": "ds18b20",
-      "name": "Ruecklauf Temperatur",
-      "refName": "oneWire1"
-    }
-  ],
-  "functionsOri": [
     {
       "type": "valueDigital",
       "name": "Heizung Festwert"
@@ -65,19 +58,19 @@
     {
       "type": "digitalIn",
       "name": "Ventil Drehgeber",
-      "pin": 6,
+      "pin": 10,
       "pullup": "up",
       "mode": "count"
     },
     {
       "type": "valve2DPosImp",
       "name": "Ventil",
-      "pinOpen": 7,
-      "pinClose": 10
+      "pinOpen": 0,
+      "pinClose": 1,
+      "pinEnable": 2
     }
   ],
-  "links": [],
-  "linksOri": [
+  "links": [
     {
       "type": "direct",
       "from": [

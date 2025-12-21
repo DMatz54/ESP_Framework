@@ -42,10 +42,12 @@ namespace JCA {
       static const char *SetupTagType;
       static const char *SetupTagOpenPin;
       static const char *SetupTagClosePin;
-
+      static const char *SetupTagEnablePin;
+      
       // Hardware
       uint8_t PinOpen;
       uint8_t PinClose;
+      uint8_t PinEnable;
 
       // Konfig
       uint16_t NoPulseTimeout;
@@ -74,7 +76,7 @@ namespace JCA {
       String getStateString (State_T _State);
 
     public:
-      Valve2DPosImp (uint8_t _PinOpen, uint8_t _PinClose, String _Name);
+      Valve2DPosImp (uint8_t _PinOpen, uint8_t _PinClose, uint8_t _PinEnable, String _Name);
       ~Valve2DPosImp () {}
 
       void update (struct tm &_Time);
